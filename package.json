@@ -1,7 +1,7 @@
 {
-    "name":  "blu-instantScreenshare",
+    "name":  "instantScreenshare",
     "version":  "1.0.0",
-    "description":  "A Vencord/Equicord plugin.",
+    "description":  "Instant Screenshare",
     "main":  "index.tsx",
     "author":  {
                    "name":  "Bluscream",

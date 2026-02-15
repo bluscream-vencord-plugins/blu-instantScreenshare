@@ -14,8 +14,15 @@ import definePlugin from "@utils/types";
 import { VoiceState } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, MediaEngineStore, Menu, PermissionsBits, PermissionStore, SelectedChannelStore, showToast, Toasts, UserStore, VoiceActions } from "@webpack/common";
+import { isStageChannel, isGuildChannel } from "./utils/channels";
 
 import { getCurrentCamera, getCurrentMedia, settings } from "./utils";
+
+import { Logger } from "@utils/Logger";
+
+const pluginId = "instantScreenshare";
+const pluginName = "Instant Screenshare";
+const logger = new Logger(pluginName, "#7289da");
 
 let hasStreamed;
 const startStream = findByCodeLazy('type:"STREAM_START"');
@@ -28,9 +35,10 @@ async function autoStartStream() {
     if (!selected) return;
 
     const channel = ChannelStore.getChannel(selected);
-    const isGuildChannel = !channel.isDM() && !channel.isGroupDM();
+    if (!channel) return;
 
-    if (channel.type === 13 || isGuildChannel && !PermissionStore.can(PermissionsBits.STREAM, channel)) return;
+    if (isStageChannel(channel)) return;
+    if (isGuildChannel(channel) && !PermissionStore.can(PermissionsBits.STREAM, channel)) return;
 
     // Auto mute/deafen if enabled
     if (settings.store.autoMute && settings.store.autoMuteDeafen !== "none") {
@@ -46,7 +54,7 @@ async function autoStartStream() {
         const currentState = (MediaEngineStore as any).getState?.() || {};
         const currentMode = currentState.settingsByContext?.default?.mode;
         const targetMode = settings.store.autoMicMode; // Already "PUSH_TO_TALK" or "VOICE_ACTIVITY"
-        
+
         // Only change if different
         if (currentMode !== targetMode) {
             FluxDispatcher.dispatch({
@@ -84,7 +92,7 @@ async function autoStartStream() {
         let sourceId = streamMedia.id;
         if (streamMedia.type === "video_device") sourceId = `camera:${streamMedia.id}`;
 
-        startStream(channel.guild_id ?? null, selected, {
+        startStream((channel as any).guild_id ?? null, selected, {
             "pid": null,
             "sourceId": sourceId,
             "sourceName": streamMedia.name,
@@ -96,7 +104,7 @@ async function autoStartStream() {
 }
 
 export default definePlugin({
-    name: "InstantScreensharePlus",
+    name: pluginName,
     description: "Instantly screenshare when joining a voice channel with support for desktop sources, windows, and video input devices (cameras, capture cards)",
     authors: [Devs.HAHALOSAH, Devs.thororen, EquicordDevs.mart,
         { name: "Bluscream", id: 467777925790564352n },
@@ -129,9 +137,9 @@ export default definePlugin({
     flux: {
         async VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
             // Check if any auto-action is enabled
-            const hasAnyAction = settings.store.autoStream || 
-                                 settings.store.autoCamera || 
-                                 (settings.store.autoMute && settings.store.autoMuteDeafen !== "none") || 
+            const hasAnyAction = settings.store.autoStream ||
+                                 settings.store.autoCamera ||
+                                 (settings.store.autoMute && settings.store.autoMuteDeafen !== "none") ||
                                  (settings.store.autoMicModeToggle && settings.store.autoMicMode !== "none");
             if (!hasAnyAction) return;
             const myId = UserStore.getCurrentUser().id;
