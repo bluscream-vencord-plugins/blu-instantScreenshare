@@ -1,11 +1,11 @@
-// Authors: Bluscream, Cursor.AI
-// Created at 2025-11-13 18:12:29
-/*
- * Vencord, a Discord client mod
- * Copyright (c) 2025 Vendicated and contributors
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
+export const pluginInfo = {
+    id: "instantScreenshare",
+    name: "Instant Screenshare",
+    description: "Instantly screenshare when joining a voice channel with support for desktop sources, windows, and video input devices (cameras, capture cards)",
+    color: "#7289da"
+};
 
+// Created at 2025-11-13 18:12:29
 import { getUserSettingLazy } from "@api/UserSettings";
 import { HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
@@ -20,9 +20,7 @@ import { getCurrentCamera, getCurrentMedia, settings } from "./utils";
 
 import { Logger } from "@utils/Logger";
 
-const pluginId = "instantScreenshare";
-const pluginName = "Instant Screenshare";
-const logger = new Logger(pluginName, "#7289da");
+const logger = new Logger(pluginInfo.name, pluginInfo.color);
 
 let hasStreamed;
 const startStream = findByCodeLazy('type:"STREAM_START"');
@@ -104,7 +102,7 @@ async function autoStartStream() {
 }
 
 export default definePlugin({
-    name: pluginName,
+    name: "Instant Screenshare",
     description: "Instantly screenshare when joining a voice channel with support for desktop sources, windows, and video input devices (cameras, capture cards)",
     authors: [Devs.HAHALOSAH, Devs.thororen, EquicordDevs.mart,
         { name: "Bluscream", id: 467777925790564352n },

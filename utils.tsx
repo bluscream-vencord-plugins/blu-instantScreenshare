@@ -1,11 +1,3 @@
-// Authors: Bluscream, Cursor.AI
-// Created at 2025-11-13 18:12:46
-/*
- * Vencord, a Discord client mod
- * Copyright (c) 2025 Vendicated and contributors
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
-
 import { definePluginSettings } from "@api/Settings";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
@@ -13,6 +5,7 @@ import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { MediaEngineStore, SearchableSelect, useEffect, useState } from "@webpack/common";
+import type { VoiceMode } from "@vencord/discord-types";
 
 interface PickerProps {
     streamMediaSelection: any[];
@@ -66,8 +59,8 @@ export const settings = definePluginSettings({
         description: "Automatically set microphone input mode when joining a voice channel",
         options: [
             { label: "Do nothing", value: "none", default: true },
-            { label: "Voice Activity", value: "VOICE_ACTIVITY" },
-            { label: "Push-To-Talk", value: "PUSH_TO_TALK" },
+            { label: "Voice Activity", value: "VOICE_ACTIVITY" as VoiceMode },
+            { label: "Push-To-Talk", value: "PUSH_TO_TALK" as VoiceMode },
         ],
     },
     autoMicModeToggle: {
@@ -131,7 +124,7 @@ export async function getCurrentMedia() {
         settings.store.streamMedia = sources[0].id;
         return sources[0];
     }
-    
+
     log.error("No sources available!");
     throw new Error("No media sources available");
 }
@@ -248,7 +241,7 @@ export function getCurrentCamera() {
         // Only fallback to first available camera if at least one setting is configured (not both "None")
         const hasPrimary = settings.store.cameraDevice && settings.store.cameraDevice !== "";
         const hasFallback = settings.store.cameraDeviceFallback && settings.store.cameraDeviceFallback !== "";
-        
+
         if (!hasPrimary && !hasFallback) {
             // Both are "None" - don't enable camera
             return null;
